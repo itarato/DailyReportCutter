@@ -1,0 +1,22 @@
+#time_bar {
+  background-color: #f00;
+  height: 30px;
+}
+
+.divider {
+  background-color: #0f0;
+  height: 30px;
+  width: 10px;
+  float: left;
+  position: absolute;
+  cursor: move;
+}
+
+#move_layer {
+  height: 30px;
+  width: 100%;
+  float: left;
+  position: absolute;
+  background-color: #00f;
+  opacity: 0.1;
+}
