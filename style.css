@@ -20,3 +20,17 @@
   background-color: #00f;
   opacity: 0.1;
 }
+
+#label_bar {
+  background-color: #ff0;
+  padding: 0 0 24px 0;
+}
+
+#label_bar input {
+  position: absolute;
+  float: left;
+  background-color: transparent;
+  border: none;
+  text-align: center;
+  width: 100px;
+}
