@@ -7,9 +7,9 @@
 
   Label = (function() {
 
-    Label.width = 100;
-
     Label.labels = [];
+
+    Label.width = 100;
 
     function Label() {
       var label_html;
@@ -21,7 +21,25 @@
       Label.updateAll();
     }
 
-    Label.updateAll = function() {};
+    Label.updateAll = function() {
+      var bar_width_half, divider, divider_x, i, labelWidthHalf, label_x, prev_x, _i, _len, _ref;
+      labelWidthHalf = Label.width >> 1;
+      if (Divider.dividers.length === 0) {
+        bar_width_half = jQuery('#label_bar').width() >> 1;
+        return jQuery(Label.labels[0]).css('left', bar_width_half - labelWidthHalf);
+      } else {
+        prev_x = 0;
+        _ref = Divider.dividers;
+        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+          divider = _ref[i];
+          divider_x = jQuery(divider).offset().left;
+          label_x = (divider_x + prev_x) * 0.5 - labelWidthHalf;
+          jQuery(Label.labels[i]).css('left', label_x);
+          prev_x = divider_x;
+        }
+        return jQuery(Label.labels[i]).css('left', (jQuery('#label_bar').width() + prev_x) * 0.5 - labelWidthHalf);
+      }
+    };
 
     return Label;
 
@@ -33,10 +51,39 @@
 
     Divider.width = 10;
 
-    function Divider() {
+    Divider.counter = 0;
+
+    Divider.activeDivider = null;
+
+    Divider.prototype.html = null;
+
+    Divider.prototype.count = Divider.counter++;
+
+    function Divider(coordX) {
+      var dividerWidthHalf,
+        _this = this;
+      dividerWidthHalf = Divider.width >> 1;
       console.log('New divider');
       Divider.dividers.push(this);
+      this.html = jQuery('<div class="divider"/>');
+      this.html.attr('id', 'divider_' + Divider.counter);
+      this.html.css('left', event.offsetX - dividerWidthHalf);
+      this.html.mousedown(this.mouseDown);
+      this.html.click(function() {
+        return _this.event.stopPropagation();
+      });
+      this.html.dblclick(this.doubleClick);
+      jQuery('#time_bar').append(this.html);
+      jQuery('#time_bar').mouseup(timeBarMouseUp);
+      jQuery('#move_layer').mousemove(moveBarMouseMove);
+      Divider.activeDivider = this;
+      addLabel(0);
+      Divider.counter++;
     }
+
+    Divider.prototype.mouseDown = function(event) {};
+
+    Divider.prototype.doubleClick = function(event) {};
 
     return Divider;
 
@@ -58,15 +105,21 @@
 
     function DividerFactory() {}
 
-    DividerFactory.addDivider = function() {
-      return new Divider();
+    DividerFactory.addDivider = function(event) {
+      return new Divider(event.offsetX);
     };
 
     return DividerFactory;
 
   })();
 
+  ({
+    timeBarMouseUp: function() {},
+    moveBarMouseMove: function() {}
+  });
+
   jQuery(function() {
+    jQuery('#time_bar').click(DividerFactory.addDivider);
     return LabelFactory.addLabel();
   });
 
