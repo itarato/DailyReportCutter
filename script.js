@@ -58,16 +58,16 @@
 //  updateLabels();
 //}
 
-function dividerDoubleClick(event) {
-  var id = jQuery(event.delegateTarget).attr('id');
-  for (var i = 0; i < dividers.length; i++) {
-    if (dividers[i].attr('id') == id) {
-      dividers[i].remove();
-      dividers = dividers.slice(0, i - 1).concat(dividers.slice(i));
-      return;
-    }
-  }
-}
+//function dividerDoubleClick(event) {
+//  var id = jQuery(event.delegateTarget).attr('id');
+//  for (var i = 0; i < dividers.length; i++) {
+//    if (dividers[i].attr('id') == id) {
+//      dividers[i].remove();
+//      dividers = dividers.slice(0, i - 1).concat(dividers.slice(i));
+//      return;
+//    }
+//  }
+//}
 
 //function addLabel(position) {
 //  var label = jQuery('<input type="textfield" value="activity"/>');

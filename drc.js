@@ -4,8 +4,6 @@
   var Divider, DividerFactory, Label, LabelFactory,
     _this = this;
 
-  console.log('Init');
-
   Label = (function() {
 
     Label.labels = [];
@@ -21,6 +19,19 @@
       Label.labels.unshift(this);
       Label.updateAll();
     }
+
+    Label.prototype.setOffsetX = function(offsetX) {
+      return jQuery(this.html).css('left', offsetX);
+    };
+
+    Label.prototype.kill = function() {
+      var _this;
+      jQuery(this.html).remove();
+      _this = this;
+      return Label.labels = Label.labels.filter(function(l) {
+        return l !== _this;
+      });
+    };
 
     Label.updateAll = function() {
       var bar_width_half, divider, divider_x, i, labelWidthHalf, label_i, label_x, prev_x, _i, _len, _ref;
@@ -42,10 +53,6 @@
         label_i = Label.labels[i];
         return label_i.setOffsetX((jQuery('#label_bar').width() + prev_x) * 0.5 - labelWidthHalf);
       }
-    };
-
-    Label.prototype.setOffsetX = function(offsetX) {
-      return jQuery(this.html).css('left', offsetX);
     };
 
     return Label;
@@ -109,19 +116,41 @@
       return jQuery(this.html).attr(param);
     };
 
-    Divider.prototype.doubleClick = function(event) {
-      var divider, divider_i, i, id, _i, _len, _ref;
-      id = jQuery(event.delegateTarget).attr('id');
+    Divider.prototype.kill = function() {
+      var divider, i, _i, _len, _ref, _this;
       _ref = Divider.dividers;
       for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
         divider = _ref[i];
-        divider_i = Divider.dividers[i];
-        if (divider_i.getHTMLAttr('id') === id) {
-          jQuery(divider_i.html).remove();
-          Divider.dividers = Divider.dividers.slice(0, i - 1).concat(Divider.dividers.slice(i));
-          return;
+        if (divider === this) {
+          Label.labels[i].kill();
         }
       }
+      _this = this;
+      Divider.dividers = Divider.dividers.filter(function(d) {
+        return d !== _this;
+      });
+      return jQuery(this.html).remove();
+    };
+
+    /Removedividerandlabel./;
+
+    Divider.prototype.doubleClick = function(event) {
+      var divider_to_kill, id;
+      id = jQuery(event.delegateTarget).attr('id');
+      divider_to_kill = Divider.dividerByID(id);
+      return divider_to_kill.kill();
+    };
+
+    Divider.dividerByID = function(id) {
+      var divider, _i, _len, _ref;
+      _ref = Divider.dividers;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        divider = _ref[_i];
+        if (divider.getHTMLAttr('id') === id) {
+          return divider;
+        }
+      }
+      return null;
     };
 
     Divider.sortDividers = function() {

@@ -1,5 +1,3 @@
-console.log('Init')
-
 class Label
   this.labels = []
   this.width = 100
@@ -12,6 +10,14 @@ class Label
     jQuery('#label_bar').append(@html)
     Label.labels.unshift(this)
     Label.updateAll()
+
+  setOffsetX: (offsetX) ->
+    jQuery(@html).css('left', offsetX)
+
+  kill: () ->
+    jQuery(@html).remove()
+    _this = this
+    Label.labels = Label.labels.filter (l) -> l != _this
 
   this.updateAll = () ->
     labelWidthHalf = Label.width >> 1
@@ -30,9 +36,6 @@ class Label
 
       label_i = Label.labels[i]
       label_i.setOffsetX((jQuery('#label_bar').width() + prev_x) * 0.5 - labelWidthHalf)
-
-  setOffsetX: (offsetX) ->
-    jQuery(@html).css('left', offsetX)
 
 class Divider
   this.dividers = []
@@ -84,14 +87,27 @@ class Divider
   getHTMLAttr: (param) ->
     jQuery(@html).attr(param)
 
+  kill: () ->
+    # @todo add even instead of knowing about label
+    for divider, i in Divider.dividers
+      if divider == this
+        Label.labels[i].kill()
+
+    _this = this
+    Divider.dividers = Divider.dividers.filter (d) -> d != _this
+    jQuery(@html).remove()
+
+  /// Remove divider and label. ///
   doubleClick: (event) ->
     id = jQuery(event.delegateTarget).attr('id')
-    for divider, i in Divider.dividers
-      divider_i = Divider.dividers[i]
-      if divider_i.getHTMLAttr('id') == id
-        jQuery(divider_i.html).remove()
-        Divider.dividers = Divider.dividers.slice(0, i - 1).concat(Divider.dividers.slice(i))
-        return
+    divider_to_kill = Divider.dividerByID(id)
+    divider_to_kill.kill()
+
+  this.dividerByID = (id) ->
+    for divider in Divider.dividers
+      if divider.getHTMLAttr('id') == id
+        return divider
+    null
 
   this.sortDividers = () ->
     Divider.dividers.sort (a, b) ->
