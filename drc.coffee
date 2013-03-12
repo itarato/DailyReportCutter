@@ -1,6 +1,7 @@
 class Label
   @labels: []
   @width: 100
+  @widthHalf: @width >> 1
 
   html: null
 
@@ -12,7 +13,7 @@ class Label
     StageManager.updateElements()
 
   offsetX: () ->
-    jQuery(@html).offset().left
+    parseInt jQuery(@html).offset().left + Label.widthHalf
 
   setOffsetX: (offsetX) ->
     jQuery(@html).css('left', offsetX)
@@ -25,11 +26,8 @@ class Label
   text: () ->
     jQuery(@html).val()
 
-  timeLabel: () ->
-    interval = StageManager.getTimeInterval()
-#    minute = (@offsetX() / StageManager.timeBarWidth()) * (interval.end - interval.start) + interval.start
-#    minute
-    null
+  index: () ->
+    Label.labels.indexOf(@)
 
 
 class Divider
@@ -61,7 +59,7 @@ class Divider
     Divider.counter++
 
   offsetX: () ->
-    jQuery(@html).offset().left
+    parseInt jQuery(@html).offset().left + Divider.widthHalf
 
   setOffsetX: (offsetX) ->
     @html.css('left', offsetX)
@@ -83,6 +81,32 @@ class Divider
       if divider == @
         return i
     -1
+
+  @interval: (idx) ->
+    interval = StageManager.getTimeInterval()
+    if idx == 0
+      start = 0
+    else
+      Divider.dividers[idx - 1].offsetX()
+      start = Divider.dividers[idx - 1].offsetX()
+
+    if idx < Divider.dividers.length
+      end = Divider.dividers[idx].offsetX()
+    else
+      end = StageManager.timeBarWidth()
+
+    toTimeString = (val) ->
+      console.log(val)
+      hour = Math.floor(val / 60)
+      hour + ':' + (val - hour * 60)
+
+    posToMinute = (pos) ->
+      (pos / StageManager.timeBarWidth()) * (interval.end - interval.start) + interval.start
+
+    getTimeFromPosition = (pos) ->
+      toTimeString posToMinute pos
+
+    getTimeFromPosition(start) + ' - ' + getTimeFromPosition(end) + ' (' + toTimeString(posToMinute(end - start) - interval.start) + ')'
 
   @getByID: (id) ->
     for divider in Divider.dividers
@@ -114,9 +138,9 @@ class StageManager
 
   @updateReport: ->
     jQuery('#report').html('<ol />')
-    for label in Label.labels
+    for label, i in Label.labels
       text = label.text()
-      jQuery('#report ol').append('<li>' + text + ' ' + label.timeLabel() + '</li>')
+      jQuery('#report ol').append('<li>' + text + ' ' + Divider.interval(i) + '</li>')
 
   @moveBarMouseMove: (e) ->
     if Divider.activeDivider
